@@ -1,7 +1,15 @@
 const express = require('express');
 const knex = require('knex');
+const { engine } = require('express-handlebars');
 
 const app = new express();
+
+app.engine('.hbs', engine({
+    extname: '.hbs',
+    defaultLayout: false
+}));
+app.set('view engine', '.hbs');
+
 
 const saep_db = knex({
     client: 'mysql2',
@@ -23,6 +31,10 @@ async function testaConexao() {
     }
 }
 
+app.get('/home', (request, response) => {
+    response.render('home', { body: 'teste' });
+});
+
 app.get('/usuario', async (request, response) => {
     const usuarios = await saep_db.select().from('USUARIO');
     response.send(usuarios);
@@ -35,21 +47,22 @@ app.get('/produto', async (reqeust, response) => {
 
 app.get('/pessoa', async (reqeust, response) => {
     const pessoas = await saep_db.select().from('PESSOA');
-    const detalhe = pessoas.map((item) => {
-        return `<tr>
-                    <td style="border: 1px solid black;">${item.ID}</td>
-                    <td style="border: 1px solid black;">${item.NOME}</td>
-                </tr>`
-    });
+    // const detalhe = pessoas.map((item) => {
+    //     return `<tr>
+    //                 <td style="border: 1px solid black;">${item.ID}</td>
+    //                 <td style="border: 1px solid black;">${item.NOME}</td>
+    //             </tr>`
+    // });
 
-    response.send(
-        `<table>
-            <tr>
-                <th style="border: 1px solid black;">ID</th>
-                <th style="border: 1px solid black;">NOME</th>
-            </tr>
-            ${detalhe}
-        </table>`);
+    // response.send(
+    //     `<table>
+    //         <tr>
+    //             <th style="border: 1px solid black;">ID</th>
+    //             <th style="border: 1px solid black;">NOME</th>
+    //         </tr>
+    //         ${detalhe}
+    //     </table>`);
+    response.render('pessoa', { data: pessoas });
 });
 
 app.get('/login', (request, response) => {
